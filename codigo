@@ -1,0 +1,185 @@
+/*
+Copyright (c) 2023 Arthur William Marques
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+//escrito em 18/03/2023 versão 01
+//exemplo simples e explicativo de código para robô de sumo, usando ponte H de 6 pinos com 2 motores e 1 sensor ultrassônico de 3 pinos
+
+//PS: Text is writen in portuguese because i designed this for my school to use.
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// DEFINIÇÕES DAS VARIÁVEIS
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// as variáveis são, de forma simples, uma maneira de atribuir informação à uma palavra-chave
+// nesse caso usamos as variáveis "int", que serve para armazenar o valor de um número inteiro pequeno
+// usamos também a variável "long", que serve para armazenar números inteiros grandes
+// é melhor usar a variável "int" ao invez da "long" sempre que possivel, pois a "long" ocupa mais espaço do programa
+//variáveis usadas no sensor ultrassônico
+int distancia;
+long duracao, cm;
+
+// "const" é adicionado antes de uma variável para definir a variável como constante, ou seja, o valor dela não pode ser alterado
+// não é obrigatório o uso de "const" mas é bom usar quando possível para pegar a prática(no futuro pode ser importante)
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// PINOS CONECTADOS NO ARDUINO
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// pino do sensor ultrassônico
+const int pingPino = 12;
+
+// pino da ponte H
+const int pino9 = 9;
+const int pino8 = 8;
+const int pino7 = 7;
+const int pino5 = 5;
+const int pino4 = 4;
+const int pino3 = 3;
+// OBS: nota-se acima que as variáveis foram utilizadas para informar ao arduino, qual pino está ligado e o nome do respectivo pino
+// existem outras maneiras de atribuir esses valores, podemos atribui-las diretamente quando vamos informar ao arduino qual o modo do pino(isso é feito abaixo)
+// nesse caso optei por informar separadamente e já atribuir o nome do pino junto, para facilitar a vizualização e o entendimento
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// SETUP
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// o "void setup" serve para rodar todo o código dentro dele uma única vez
+// nesse caso rodará o codigo que vai informar o arduino os modos do pino e também o atraso(delay) antes de executar o resto do código
+void setup()
+{
+
+  // a função "delay", como o nome já sugere, cria um delay, nesse caso o delay é em milisegundos
+  // abaixo a função "delay" criará um delay de 3 segundos(3000 milisegundos), após isso executará o resto do código que está abaixo dela
+  delay(3000);
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  // a função "pinMode" serve para informar ao arduino qual modo o pino está operando (entrada/INPUT ou saída/OUTPUT)
+  // nesse caso, o sinal está saindo do arduino e indo em direção a ponte H, por essa razão, os pinos estão no modo OUTPUT(saída em inglês)
+  // motores da esquerda
+  pinMode (pino3, OUTPUT);
+  pinMode (pino4, OUTPUT);
+  pinMode (pino5, OUTPUT);
+  
+  // motores da direita
+  pinMode (pino7, OUTPUT);
+  pinMode (pino8, OUTPUT);
+  pinMode (pino9, OUTPUT);   
+}
+// OBS: os commas( "{" e "}" ) são usados para abrir e fechar declarações
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// CÓDIGO PRINCIPAL QUE CONTROLA O ROBÔ
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// a função "void loop" serve para executar o código dentro dela infinitamente(a não ser que a função "break" ou "return" seja usada porém isso é mais avançado)
+// quando acabar de ler o código ela volta para o começo e executa denovo infinitas vezes
+void loop()
+{
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// CÓDIGO QUE CONTROLA E OBTEM LEITURAS DO SENSOR ULTRASSÔNICO
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// o sensor ultrassônico funciona usando um princípio interessante:
+// quando o som é ultrassônico, ele viaja em linha reta, como se fosse um laser, o sensor ultrassônico usa esse princípio para calcular a distância de um objeto
+// de forma simples, ele usa o tempo que o som leva para viajar até o objeto e voltar para calcular a distância
+// a função "pinMode" abaixo é usada para informar ao arduino que o pino do sensor é uma saida(OUTPUT)
+  pinMode(pingPino, OUTPUT);
+  
+  // a função "digitalWrite" serve para atribuir um valor HIGH(alto) ou LOW(baixo) a algum pino
+  // o HIGH é o equivalente a ter energia sendo transmitida pelo pino ou ligado, já o LOW é o oposto, ou seja, vai estar desligado
+  // no caso abaixo estamos informando que o pino do sensor está desenergizado, isso é para garantir que não estejamos ligando o sensor sem necessidade
+  digitalWrite(pingPino, LOW);
+
+  // abaixo estamos usando a função para ligar o sensor e usando o delay para especificar que ligaremos o sensor por 5 microsegundos(0,000005s)
+  // estamos usando 5 microsegundos pois o sensor precisa de um sinal de ao menos 2 microsegundos para funcionar
+  digitalWrite(pingPino, HIGH);
+  delayMicroseconds(5);
+  
+  // após o delay de 5 microsegundos, o arduino executará a função abaixo para parar de enviar um sinal ao sensor
+  digitalWrite(pingPino, LOW);
+
+  // depois de receber o sinal, precisaremos "escutar" o som voltar, para isso, colocaremos o pino do sensor como INPUT(entrada)
+  pinMode(pingPino, INPUT);
+
+  // a função "pulseIn" é utilizada para informar ao arduino que ele receberá um pulso, nesse caso estamos informando "duração <-- pulseIn <-- pino do sensor"
+  // ou seja, estamos dizendo pro arduino que receberá um pulso, informando que esse pulso será recebido pelo pino do sensor e que deve ser atribuído a variável "duração"
+  duracao = pulseIn(pingPino, HIGH);
+
+  // agora que o arduino fez a leitura do sensor e tem o valor atribuído a "duração" precisamos converte-la em centímetros, isso é muito simples
+  // precisamos dividir o valor por 29, porque o som leva 29 microsegundos para viajar 1 cm e após isso dividir novamente por 2, devido ao fato de que o som saiu do sensor e voltou
+  // esse processo é feito na simples equação abaixo:
+  cm = duracao / 29 / 2;
+
+// OBS:existem bibliotecas que cuidam do processo acima, tornando ainda mais facil usar um sensor ultrassônico
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// MOVIMENTO DE BUSCA E ATAQUE
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  // agora que temos o valor do sensor, iremos escrever um algorítmo simples para controlar o movimento do robô de forma autonôma
+  // primeiro vamos desligar todos os pinos que controlam os motores, isso porque, como é um loop infinito, se ligarmos para alguma direção
+  // e esquecermos de desligar, vai ficar ligado para sempre, que não é oque queremos :p
+   digitalWrite(pino3, LOW);
+   digitalWrite(pino4, LOW);  
+   digitalWrite(pino5, LOW);
+   digitalWrite(pino8, LOW);
+   digitalWrite(pino9, LOW);
+   
+  // para controlar o movimento do robô vamos utilizar a condição "if", ela traduz para "se" e com isso já podemos ter uma ideia de como funciona
+  // estamos usando o "if" nesse caso para dizer: se cm(a varíavel que medimos com o sensor la em cima) for maior que 55 cm execute o codigo abaixo
+  // o arduino vai verificar toda vez que obtiver o valor do sensor se a distancia que ele detectou de um objeto é maior que 55 cm
+  if (cm < 55)
+  {
+
+    // no caso de ser maior que 55cm o arduino vai executar esse código, que de forma simples, vai fazer o robo ficar girando
+   digitalWrite(pino3, HIGH);
+   digitalWrite(pino4, HIGH);
+   digitalWrite(pino8, HIGH);
+   digitalWrite(pino9, HIGH);
+  }
+  
+  // no caso de não executar o codigo do "if" o código presente abaixo do "else" vai ser executado
+  // o codigo presente no "else" vai ser executado apenas quando a distancia detectada pelo sensor ser menor que 55 cm
+   else
+  {
+
+    // o código abaixo vai ligar todos os motores para frente, oque significa que o robo vai conseguentemente se mover para frente
+    digitalWrite(pino3, HIGH);
+    digitalWrite(pino5, HIGH);    
+    digitalWrite(pino8, HIGH);
+    digitalWrite(pino9, HIGH);
+
+    // por fim, esse código que escrevi acima vai fazer o robô girar na arena até encontrar o robô inimigo, quando encontrar o robô inimigo irá acelerar com toda velocidade em direção a ele com o objetivo de derrubá-lo
+     
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+ }
+}
